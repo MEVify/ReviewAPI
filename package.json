@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "csv-parser": "^3.0.0",
+    "fast-csv": "^4.3.6",
+    "mongoose": "^7.0.3",
+    "pg": "^8.10.0",
+    "pg-copy-streams": "^6.0.5",
+    "pg-promise": "^11.4.3"
+  }
+}
