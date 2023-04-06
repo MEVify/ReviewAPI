@@ -1,5 +1,3 @@
-const fs = require('fs');
-const csv = require('fast-csv');
 const pgPromise = require('pg-promise')();
 const path = require('path');
 
