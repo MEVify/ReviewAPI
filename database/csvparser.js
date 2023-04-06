@@ -1,6 +1,7 @@
 const fs = require('fs');
 const csv = require('fast-csv');
 const pgPromise = require('pg-promise')();
+const path = require('path');
 
 const db = pgPromise({
   user: 'mevcaus',
@@ -10,85 +11,79 @@ const db = pgPromise({
   port: 5432,
 });
 
-const insertBatch = async (rows, columnNames, tableName) => {
-  const query = pgPromise.helpers.insert(rows, columnNames, tableName)
-  await db.none(query)
-    .then(() => {
-      console.log(`${tableName} imported successfully with ${row.length} rows`)
-    })
-    .catch(err => {
-      console.log('err importing\n', tableName, err)
-    })
-}
-const importCharacteristicsData = () => {
-  const stream = fs.createReadStream('./csvfiles/characteristics.csv');
-  let rows = [];
-  const csvStream = csv.parse({ headers: true })
-    .on('data', data => {
-      rows.push(data);
-    })
-    .on('end', () => {
-      insertBatch(rows, ['id', 'product_id', 'name'], 'characteristics')
-    })
-    stream.pipe(csvStream);
-}
 
-const importReviewsData = () => {
-  const stream = fs.createReadStream('./csvfiles/reviews.csv');
-  let rows = [];
-  let i = 0;
-  const csvStream = csv.parse({ headers: true })
-    .on('data', row => {
-      let date = row.date;
-      if (/^\d{13}$/.test(date)) {
-        row.date = `${new Date(date / 1000).toISOString()}`;
-      }
-      if (row.recommend === 'null') {
-        row.recommend = false;
-      }
-      rows.push(row);
-      if (rows.length > 9999) {
-        insertBatch(rows, [
-          'id',
-          'product_id',
-          'rating',
-          'date',
-          'summary',
-          'body',
-          'recommend',
-          'reported',
-          'reviewer_name',
-          'reviewer_email',
-          'response',
-          'helpfulness'
-        ],
-        'reviews'
-        );
-        rows = [];
-        i += 1;
-        console.log(i);
-      }
-    })
-    .on('end', () => {
-      insertBatch(rows, [
-        'id',
-        'product_id',
-        'rating',
-        'date',
-        'summary',
-        'body',
-        'recommend',
-        'reported',
-        'reviewer_name',
-        'reviewer_email',
-        'response',
-        'helpfulness'
-      ],
-      'reviews'
-    );
-    })
-    stream.pipe(csvStream);
-}
+const importCharacteristicsData = async () => {
+  try {
+    const filePath = path.resolve(__dirname, './csvfiles/characteristics.csv')
+    await db.none(`COPY characteristics(id, product_id, name)
+                    FROM '${filePath}'
+                    DELIMITER ','
+                    CSV HEADER;`);
+    console.log('characteristics imported successfully');
+  } catch (error) {
+    console.log('error importing characteristics', error);
+  }
+};
 
+
+const importReviewsData = async () => {
+  try {
+    const filePath = path.resolve(__dirname, './csvfiles/reviews.csv')
+
+    await db.none(`COPY reviews(id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+                    FROM '${filePath}'
+                    DELIMITER ','
+                    CSV HEADER;`);
+
+    console.log('reviews imported successfully');
+  } catch (error) {
+    console.log('error importing reviews', error);
+  }
+};
+
+const importCharacteristicsReviews = async () => {
+  try {
+    const filePath = path.resolve(__dirname, './csvfiles/characteristic_reviews.csv');
+
+    // Disable foreign key constraints
+    await db.none('SET CONSTRAINTS ALL DEFERRED');
+
+    await db.none(`COPY characteristics_reviews(id, characteristic_id, review_id, value)
+                    FROM '${filePath}'
+                    DELIMITER ','
+                    CSV HEADER;`);
+
+    // Enable foreign key constraints
+    await db.none('SET CONSTRAINTS ALL IMMEDIATE');
+
+    console.log('characteristic reviews imported successfully');
+  } catch (error) {
+    console.log('error importing characteristic reviews', error);
+  }
+};
+
+
+const importReviewsPhotos = async () => {
+  try {
+    const filePath = path.resolve(__dirname, './csvfiles/reviews_photos.csv');
+
+    // Disable foreign key constraints
+    await db.none('SET CONSTRAINTS ALL DEFERRED');
+
+    await db.none(`COPY reviews_photos(id, review_id, url)
+                    FROM '${filePath}'
+                    DELIMITER ','
+                    CSV HEADER;`);
+
+    // Enable foreign key constraints
+    await db.none('SET CONSTRAINTS ALL IMMEDIATE');
+
+    console.log('reviews photos imported successfully');
+  } catch (error) {
+    console.log('error importing characteristic reviews', error);
+  }
+};
 // importCharacteristicsData();
 // importReviewsData();
+// importCharacteristicsReviews();
+// importReviewsPhotos();
