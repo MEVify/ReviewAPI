@@ -14,7 +14,7 @@ CREATE TABLE reviews (
   summary TEXT NOT NULL,
   body TEXT NOT NULL,
   recommend BOOLEAN NOT NULL,
-  reported BOOLEAN NOT NULL,
+  reported BOOLEAN NOT NULL DEFAULT false,
   reviewer_name TEXT NOT NULL,
   reviewer_email TEXT NOT NULL,
   response TEXT,

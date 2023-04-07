@@ -9,7 +9,6 @@ const db = pgPromise({
   port: 5432,
 });
 
-
 const importCharacteristicsData = async () => {
   try {
     const filePath = path.resolve(__dirname, './csvfiles/characteristics.csv')
@@ -22,7 +21,6 @@ const importCharacteristicsData = async () => {
     console.log('error importing characteristics', error);
   }
 };
-
 
 const importReviewsData = async () => {
   try {
@@ -59,7 +57,6 @@ const importCharacteristicsReviews = async () => {
     console.log('error importing characteristic reviews', error);
   }
 };
-
 
 const importReviewsPhotos = async () => {
   try {
