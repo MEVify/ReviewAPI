@@ -33,3 +33,9 @@ CREATE TABLE reviews_photos (
   review_id INTEGER NOT NULL REFERENCES reviews(id),
   url TEXT NOT NULL
 );
+
+CREATE INDEX ON reviews (product_id);
+CREATE INDEX ON reviews_photos (review_id);
+CREATE INDEX ON characteristics_reviews (review_id);
+CREATE INDEX ON characteristics_reviews (characteristic_id);
+CREATE INDEX ON characteristics (product_id);
