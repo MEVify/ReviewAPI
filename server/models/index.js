@@ -1,8 +1,8 @@
-const db = require('../db.js');
+const db = require('../db');
 
 module.exports = {
   getReviewData: (page, count, sort, product_id) => {
-  let query = `
+    let query = `
     SELECT json_build_object(
       'review_id', r.id,
       'rating', r.rating,
@@ -28,28 +28,26 @@ module.exports = {
     WHERE r.product_id = ${product_id}
     AND r.reported = false`;
 
-  if (sort === 'newest') {
-    query += ' ORDER BY r.date DESC';
-  } else if (sort === 'helpful') {
-    query += ' ORDER BY r.helpfulness DESC';
-  } else if (sort === 'relevant') {
-    query += ' ORDER BY r.helpfulness DESC, r.date DESC';
-  }
+    if (sort === 'newest') {
+      query += ' ORDER BY r.date DESC';
+    } else if (sort === 'helpful') {
+      query += ' ORDER BY r.helpfulness DESC';
+    } else if (sort === 'relevant') {
+      query += ' ORDER BY r.helpfulness DESC, r.date DESC';
+    }
 
-  query += ` OFFSET ${(page - 1) * count} LIMIT ${count}`;
+    query += ` OFFSET ${(page - 1) * count} LIMIT ${count}`;
 
-  return db.any(query)
-    .then(reviews => {
-      return {
+    return db.any(query)
+      .then((reviews) => ({
         product: product_id,
         page,
         count,
-        results: reviews.map(review => review.review)
-      };
-    })
-    .catch(err => {
-      console.log('err doing query for reviews\n', err)
-    })
+        results: reviews.map((review) => review.review),
+      }))
+      .catch((err) => {
+        throw err;
+      });
   },
   getMetaData: (product_id) => {
     const query = `
@@ -106,46 +104,41 @@ module.exports = {
         )
       ) AS meta_data
   `;
-  return db.one(query);
-},
+    return db.one(query);
+  },
   addReview: (reviewsData, photos, characteristics) => {
-  const reviewQuery = `
+    const reviewQuery = `
     INSERT INTO reviews (product_id, rating, summary, body, recommend, reviewer_name, reviewer_email, date, reported)
     VALUES ($1, $2, $3, $4, $5, $6, $7, EXTRACT( EPOCH FROM now() ), false)
     RETURNING id
   `;
-  const photoQuery = `
+    const photoQuery = `
   INSERT INTO reviews_photos (review_id, url)
   VALUES ($1, $2)
   `;
-  const characteristicsQuery = `
+    const cQuery = `
   INSERT INTO characteristics_reviews (characteristic_id, review_id, value)
   VALUES ($1, $2, $3)
 `;
-  return db.tx(t => {
-    return t.one(reviewQuery, reviewsData)
-      .then(review_id => {
-        const promises = photos.map(photo => {
-          return t.none(photoQuery, [review_id.id, photo])
-        });
+    return db.tx((t) => t.one(reviewQuery, reviewsData)
+      .then((review) => {
+        const promises = photos.map((photo) => t.none(photoQuery, [review.id, photo]));
         return t.batch(promises)
           .then(() => {
-            const cPromises = Object.keys(characteristics).map(characteristic_id => {
-              return t.none(characteristicsQuery, [characteristic_id, review_id.id, characteristics[characteristic_id]]);
-            });
+            const cPromises = Object.keys(characteristics)
+              .map((characteristic_id) => t.none(cQuery, [
+                characteristic_id,
+                review.id,
+                characteristics[characteristic_id],
+              ]));
             return t.batch(cPromises);
-          })
-      })
-  })
-},
-  incrementReview: (review_id) => {
-    return db.none(`UPDATE reviews
+          });
+      }));
+  },
+  incrementReview: (review_id) => db.none(`UPDATE reviews
     SET helpfulness = helpfulness + 1
-    WHERE id = ${review_id}`);
-},
-  reportReview: (review_id) => {
-    return db.none(`UPDATE reviews
+    WHERE id = ${review_id}`),
+  reportReview: (review_id) => db.none(`UPDATE reviews
     SET reported = true
-    WHERE id = ${review_id}`);
-  }
-}
+    WHERE id = ${review_id}`),
+};

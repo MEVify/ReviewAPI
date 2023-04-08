@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "server": "npx nodemon --watch server server/index.js"
+    "server": "npx nodemon --watch server server/index.js",
+    "test": "jest"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -12,5 +13,12 @@
     "pg": "^8.10.0",
     "pg-copy-streams": "^6.0.5",
     "pg-promise": "^11.4.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.37.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
   }
 }

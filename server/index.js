@@ -1,15 +1,21 @@
 const express = require('express');
-const router = require('./router.js');
 const morgan = require('morgan');
 const cors = require('cors');
+const router = require('./router');
+
 const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(router)
+app.use(router);
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:8080',
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: ['Content-Type'],
+}));
 
 app.listen(port, () => {
-  console.log(`listening at http://localhost:${port}`)
-})
+});
+
+module.exports = app;

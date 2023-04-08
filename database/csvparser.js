@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
 const pgPromise = require('pg-promise')();
 const path = require('path');
 
@@ -11,7 +13,7 @@ const db = pgPromise({
 
 const importCharacteristicsData = async () => {
   try {
-    const filePath = path.resolve(__dirname, './csvfiles/characteristics.csv')
+    const filePath = path.resolve(__dirname, './csvfiles/characteristics.csv');
     await db.none(`COPY characteristics(id, product_id, name)
                     FROM '${filePath}'
                     DELIMITER ','
@@ -24,7 +26,7 @@ const importCharacteristicsData = async () => {
 
 const importReviewsData = async () => {
   try {
-    const filePath = path.resolve(__dirname, './csvfiles/reviews.csv')
+    const filePath = path.resolve(__dirname, './csvfiles/reviews.csv');
 
     await db.none(`COPY reviews(id, product_id, rating, date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
                     FROM '${filePath}'

@@ -5,7 +5,7 @@ const config = {
   port: 5432,
   database: 'reviews',
   user: 'mevcaus',
-  password: 'LakeCascade13'
+  password: 'LakeCascade13',
 };
 
 const db = pgPromise(config);
