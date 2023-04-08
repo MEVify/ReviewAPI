@@ -7,7 +7,6 @@ module.exports = {
     const {
       page = 1, count = 5, sort = 'newest', product_id,
     } = req.query;
-
     db.getReviewData(page, count, sort, product_id)
       .then((info) => {
         info.results.forEach(({ response, date }) => {
