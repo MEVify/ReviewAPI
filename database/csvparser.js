@@ -7,7 +7,6 @@ const db = pgPromise({
   user: 'mevcaus',
   host: 'localhost',
   database: 'reviewsTest',
-  password: 'LakeCascade13',
   port: 5432,
 });
 
