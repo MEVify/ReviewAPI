@@ -52,7 +52,7 @@ Each server is able to handle around 1500 requests per second with caching with 
 
 #### Database
 
-PostgreSQL, a ralational database was used as each review has a set of associated characteristics, photos, and characteristic styles.
+PostgreSQL, a relational database was used as each review has a set of associated characteristics, photos, and characteristic styles.
 
 #### Deployment
 
