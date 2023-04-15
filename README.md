@@ -65,7 +65,7 @@ Each component was hosted on an Amazon Web Services (AWS) EC2 micro-instance. AW
 
 #### Adding servers
 - NGINX load balancer distributes requests across the servers
-- Benefit: Linear increase, each server was able to handle approximately 2000 requests per second with less than 20ms latency
+- Benefit: Linear increase, each server was able to handle approximately 1000 requests per second with less than 20ms latency
 - Cost: Having to purchase more server space
 
 #### Caching
